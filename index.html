@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bubble Security Bot — Dashboard</title>
+  <style>
+    :root{
+      --bg:#071127;
+      --glass: rgba(255,255,255,0.03);
+      --glass-2: rgba(255,255,255,0.02);
+      --card-border: rgba(255,255,255,0.06);
+      --muted: rgba(255,255,255,0.75);
+      --radius:14px;
+      --accent-a: #7c3aed;
+      --accent-b: #06b6d4;
+      --accent-c: #ff6a00;
+      --accent-d: #10b981;
+      --accent-e: #f43f5e;
+      --glass-gradient: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,0.12), transparent), radial-gradient(1000px 500px at 90% 90%, rgba(6,182,212,0.08), transparent), var(--bg);color:#fff}
+
+    header{width:100%;padding:18px 26px;display:flex;align-items:center;gap:18px;background:linear-gradient(90deg, rgba(255,255,255,0.02), transparent)}
+    .logo{display:flex;align-items:center;gap:12px}
+    .mark{width:52px;height:52px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent-b),var(--accent-a));box-shadow:0 10px 30px rgba(7,10,34,0.6);transform:translateZ(0)}
+    .mark:hover{transform:translateY(-4px) scale(1.02)}
+    .logo h1{font-size:1.15rem;margin:0}
+    .logo p{margin:0;font-size:0.78rem;opacity:0.9}
+
+    main{display:grid;grid-template-columns:280px 1fr;gap:24px;padding:22px;height:calc(100% - 84px)}
+
+    nav{background:var(--glass);padding:16px;border-radius:16px;border:1px solid var(--card-border);height:100%;backdrop-filter: blur(6px)}
+    nav ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+    nav a{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;text-decoration:none;color:inherit;position:relative;overflow:hidden}
+    nav a .ico{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:linear-gradient(90deg, rgba(255,255,255,0.03), transparent)}
+    nav a:hover{transform:translateX(6px);transition:transform .18s ease}
+    nav a.active{background:linear-gradient(90deg, rgba(124,58,237,0.14), rgba(6,182,212,0.06));box-shadow:0 10px 30px rgba(7,10,34,0.6)}
+
+    .content{height:100%;overflow:auto;padding:18px;border-radius:16px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:1px solid var(--card-border)}
+    .page{display:none}
+    .page.active{display:block}
+
+    .hero{display:flex;gap:20px;align-items:center}
+    .hero .left{flex:1}
+    .hero .right{width:340px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:16px;border-radius:12px;border:1px solid var(--card-border)}
+
+    .btn{display:inline-block;padding:12px 18px;border-radius:12px;text-decoration:none;font-weight:700;cursor:pointer;position:relative;overflow:hidden}
+    .btn:after{content:'';position:absolute;left:0;top:0;right:0;bottom:0;opacity:0;transition:opacity .25s}
+    .btn:active{transform:translateY(2px) scale(.998)}
+
+    .btn-primary{background:linear-gradient(90deg,var(--accent-a),var(--accent-c));color:white;box-shadow:0 12px 30px rgba(124,58,237,0.18)}
+    .btn-primary:hover:after{opacity:.06;background:linear-gradient(90deg, rgba(255,255,255,0.08), transparent)}
+
+    .btn-teal{background:linear-gradient(90deg,var(--accent-b),var(--accent-d));color:white}
+    .btn-ghost{background:transparent;border:1px solid var(--card-border);color:var(--muted)}
+
+    .card{background:rgba(255,255,255,0.02);padding:14px;border-radius:12px;border:1px solid var(--card-border);margin-bottom:12px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+
+    code, pre{font-family:SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace;background:rgba(0,0,0,0.25);padding:8px;border-radius:8px;display:block;overflow:auto}
+
+    footer{padding:18px;text-align:center;color:rgba(255,255,255,0.6);font-size:0.9rem}
+
+    .invite-row{display:flex;gap:12px;align-items:center}
+    .invite-row input{flex:1;padding:10px;border-radius:10px;background:transparent;border:1px solid var(--card-border);color:white}
+
+    .ripple{position:absolute;border-radius:50%;transform:scale(0);animation:ripple .6s linear;opacity:.9;background:rgba(255,255,255,0.18)}
+    @keyframes ripple{to{transform:scale(8);opacity:0}}
+
+    .feature-icon{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;font-size:22px}
+
+    .badge{padding:6px 10px;border-radius:999px;font-weight:700;font-size:0.85rem}
+    .badge-purple{background:linear-gradient(90deg,var(--accent-a),#a78bfa)}
+    .badge-teal{background:linear-gradient(90deg,var(--accent-b),#38bdf8)}
+    .badge-orange{background:linear-gradient(90deg,var(--accent-c),#fb7185)}
+
+    @media (max-width:900px){main{grid-template-columns:1fr;padding:14px}nav{display:flex;overflow:auto;margin-bottom:12px}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <div class="mark">💎</div>
+      <div>
+        <h1>Bubble Security Bot</h1>
+        <p>Secure • Fast • Good • 24/7 Servers!</p>
+      </div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
+      <a class="btn btn-primary" id="inviteHeaderBtn" href="https://discord.com/oauth2/authorize?client_id=1429046974778179624&permissions=8&integration_type=0&scope=bot">Invite</a>
+    </div>
+  </header>
+
+  <main>
+    <nav>
+      <ul>
+        <li><a href="#home" class="navlink active" data-page="home"><span class="ico">🏠</span> Home</a></li>
+        <li><a href="#invite" class="navlink" data-page="invite"><span class="ico">🔗</span> Invite</a></li>
+        <li><a href="#login" class="navlink" data-page="login"><span class="ico">🔐</span> Website Login</a></li>
+        <li><a href="#features" class="navlink" data-page="features"><span class="ico">✨</span> Features</a></li>
+        <li><a href="#setup" class="navlink" data-page="setup"><span class="ico">⚙️</span> Setup</a></li>
+        <li><a href="#docs" class="navlink" data-page="docs"><span class="ico">📚</span> Docs</a></li>
+        <li><a href="#support" class="navlink" data-page="support"><span class="ico">📞</span> Support</a></li>
+      </ul>
+    </nav>
+
+    <section class="content">
+      <section id="home" class="page active page-home">
+        <h2>Welcome to Bubble Bot</h2>
+        <p>BubbleSecurityBot Is a security bot, Anti nuke bot, secure guild info, and a lot more. Currently Used In 10+ Servers.</p>
+      </section>
+
+      <section id="invite" class="page">
+        <h2>Invite Bubble Bot</h2>
+        <p>Click the button below to invite Bubble Bot to your Discord server.</p>
+        <a class="btn btn-primary ripple-target" href="https://discord.com/oauth2/authorize?client_id=1429046974778179624&permissions=8&integration_type=0&scope=bot">Invite Bubble Bot</a>
+      </section>
+
+      <section id="login" class="page">
+        <h2>Website Login</h2>
+        <p>Access your dashboard and settings through our secure login.
+        </p>
+        <p>Warning, The login is still not done but in development so we do not recommend logging in.</p>
+        <a class="btn btn-teal ripple-target" href="https://discord.com/oauth2/authorize?client_id=1429046974778179624&permissions=8&integration_type=0&scope=bot">Login</a>
+      </section>
+
+      <section id="features" class="page">
+        <h2>Features</h2>
+        <p>Bubble Bot offers analytics, server protection, automated tasks, and more.</p>
+      </section>
+
+      <section id="setup" class="page">
+        <h2>Setup</h2>
+        <p>To setup BubbleSecurityBot On Your Server, Please do /setup "Your Server ID!"</p>
+      </section>
+
+      <section id="docs" class="page">
+        <h2>Documentation</h2>
+        <p>None published yet. Hosted in 127.0.0.1:3001</p>
+      </section>
+
+      <section id="support" class="page">
+  <h2>Contact Us</h2>
+  <p>If you have any issues, questions, or feedback, please fill out the form below — we’d love to hear from you!</p>
+  
+    <form id="contactForm">
+    <label for="name">Your Name</label>
+    <input type="text" id="name" name="name" placeholder="Enter your name" required />
+
+    <label for="email">Your Email</label>
+    <input type="email" id="email" name="email" placeholder="Enter your email" required />
+
+    <label for="message">Please say your message here</label>
+    <textarea id="message" name="message" rows="6" placeholder="Type your message..." required></textarea>
+
+    <button type="submit" class="btn btn-primary">Send Message</button>
+  </form>
+
+  <p id="statusMessage"></p>
+</section>
+
+<style>
+  #contact {
+    animation: fadeIn 0.4s ease;
+  }
+
+  .contact-container {
+    margin-top: 24px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    backdrop-filter: blur(6px);
+  }
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  input[type="text"],
+  input[type="email"],
+  textarea {
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.04);
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+    transition: 0.25s ease;
+  }
+
+  input:focus,
+  textarea:focus {
+    border-color: var(--accent-b);
+    background: rgba(255,255,255,0.07);
+    box-shadow: 0 0 10px rgba(6,182,212,0.3);
+  }
+
+  textarea {
+    resize: none;
+  }
+
+  .btn-primary {
+    background: linear-gradient(90deg, var(--accent-a), var(--accent-c));
+    color: #fff;
+    font-weight: 700;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    width: 100%;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+  }
+
+  .btn-primary:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 15px rgba(124,58,237,0.5);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+
+<script>
+  const contactForm = document.getElementById('contactForm');
+  contactForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    alert('Thank you for your message! We’ll get back to you soon.');
+    contactForm.reset();
+  });
+</script>
+
+  </main>
+
+  <footer>© Bubble Bot • Made with ❤</footer>
+  
+
+  <script>
+    const links = document.querySelectorAll('.navlink');
+    const pages = document.querySelectorAll('.page');
+    function goTo(pageId){
+      pages.forEach(p=>p.classList.remove('active'));
+      document.getElementById(pageId)?.classList.add('active');
+      links.forEach(l=>l.classList.remove('active'));
+      const activeLink = document.querySelector('.navlink[data-page="'+pageId+'"]');
+      activeLink?.classList.add('active');
+      history.replaceState(null,'', '#'+pageId);
+    }
+    links.forEach(a=>{
+      a.addEventListener('click', (e)=>{
+        e.preventDefault();
+        goTo(a.dataset.page);
+      });
+    });
+
+    document.querySelectorAll('.ripple-target').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const rect = btn.getBoundingClientRect();
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        const size = Math.max(rect.width, rect.height);
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+        ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+        btn.appendChild(ripple);
+        setTimeout(()=>ripple.remove(), 700);
+      });
+    });
+  </script>
+  <script>
+  (function() {
+    emailjs.init("HJRg7fJGwI43Qy8cA"); // Replace with your EmailJS user ID
+  })();
+
+  const contactForm = document.getElementById('contactForm');
+  contactForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(contactForm);
+    const data = {
+      from_name: formData.get("name"),
+      from_email: formData.get("email"),
+      message: formData.get("message")
+    };
+
+    emailjs.send("service_tfshpmk", "template_4f0udrh", data)
+      .then(function(response) {
+        alert('Your message has been sent successfully!');
+        contactForm.reset();
+      }, function(error) {
+        alert('Oops! Something went wrong. Please try again later.');
+      });
+  });
+</script>
+
+</body>
+</html>
